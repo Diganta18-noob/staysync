@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import {
   HiOutlineCalendarDays, HiOutlineCheckCircle,
   HiOutlineXCircle, HiOutlineClock, HiOutlineBuildingOffice2,
-  HiOutlineUser, HiOutlineCurrencyRupee,
+  HiOutlineUser, HiOutlineArrowPath,
 } from 'react-icons/hi2';
 
 const tabs = [
@@ -12,7 +12,7 @@ const tabs = [
   { key: 'rejected', label: 'Rejected', icon: HiOutlineXCircle, color: 'text-red-500' },
 ];
 
-const demoBookings = {
+const initialBookings = {
   pending: [
     { id: 1, name: 'Amit Sharma', room: 'A-102', type: 'Move-in', date: 'Apr 15, 2026', rent: '₹8,500', deposit: '₹8,500', proRata: '₹4,250', avatar: 'AS', property: 'Sunrise PG' },
     { id: 2, name: 'Neha Gupta', room: 'B-201', type: 'Move-in', date: 'Apr 18, 2026', rent: '₹14,000', deposit: '₹14,000', proRata: '₹6,067', avatar: 'NG', property: 'Sunrise PG' },
@@ -29,7 +29,51 @@ const demoBookings = {
 const Bookings = () => {
   const { isOwner, isAdmin } = useAuth();
   const [activeTab, setActiveTab] = useState('pending');
-  const bookings = demoBookings[activeTab];
+  const [bookingsData, setBookingsData] = useState(initialBookings);
+  const [actionMessage, setActionMessage] = useState(null);
+
+  const bookings = bookingsData[activeTab];
+
+  const showMessage = (msg, type = 'success') => {
+    setActionMessage({ msg, type });
+    setTimeout(() => setActionMessage(null), 3000);
+  };
+
+  const handleApprove = (booking) => {
+    setBookingsData(prev => ({
+      ...prev,
+      [activeTab]: prev[activeTab].filter(b => b.id !== booking.id),
+      approved: [...prev.approved, { ...booking, paymentStatus: 'pending', reason: undefined }],
+    }));
+    showMessage(`${booking.name}'s booking has been approved!`);
+  };
+
+  const handleReject = (booking) => {
+    setBookingsData(prev => ({
+      ...prev,
+      pending: prev.pending.filter(b => b.id !== booking.id),
+      rejected: [...prev.rejected, { ...booking, reason: 'Rejected by admin' }],
+    }));
+    showMessage(`${booking.name}'s booking has been rejected.`, 'warning');
+  };
+
+  const handleReApprove = (booking) => {
+    setBookingsData(prev => ({
+      ...prev,
+      rejected: prev.rejected.filter(b => b.id !== booking.id),
+      approved: [...prev.approved, { ...booking, paymentStatus: 'pending', reason: undefined }],
+    }));
+    showMessage(`${booking.name}'s booking has been re-approved!`);
+  };
+
+  const handleMoveToPending = (booking) => {
+    setBookingsData(prev => ({
+      ...prev,
+      rejected: prev.rejected.filter(b => b.id !== booking.id),
+      pending: [...prev.pending, { ...booking, reason: undefined }],
+    }));
+    showMessage(`${booking.name}'s booking moved back to pending.`);
+  };
 
   return (
     <div className="min-h-screen bg-surface-50 dark:bg-surface-950 pb-20">
@@ -41,6 +85,17 @@ const Bookings = () => {
           </h1>
           <p className="text-surface-500 mt-1">Manage and track all booking requests</p>
         </div>
+
+        {/* Action message toast */}
+        {actionMessage && (
+          <div className={`fixed top-20 right-4 z-50 px-6 py-3 rounded-xl shadow-xl text-sm font-medium animate-fade-in-down ${
+            actionMessage.type === 'success'
+              ? 'bg-emerald-500 text-white'
+              : 'bg-amber-500 text-white'
+          }`}>
+            {actionMessage.msg}
+          </div>
+        )}
 
         {/* Tabs */}
         <div className="flex gap-1 p-1 bg-surface-100 dark:bg-surface-800 rounded-2xl mb-8 w-fit animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
@@ -61,7 +116,7 @@ const Bookings = () => {
                   ? 'bg-primary-100 dark:bg-primary-900/30 text-primary-600'
                   : 'bg-surface-200 dark:bg-surface-700 text-surface-500'
               }`}>
-                {demoBookings[tab.key].length}
+                {bookingsData[tab.key].length}
               </span>
             </button>
           ))}
@@ -129,10 +184,16 @@ const Bookings = () => {
                   <div className="flex items-center gap-2">
                     {activeTab === 'pending' && (isOwner || isAdmin) && (
                       <>
-                        <button className="px-5 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-sm font-semibold transition-colors">
+                        <button
+                          onClick={() => handleApprove(booking)}
+                          className="px-5 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-sm font-semibold transition-colors"
+                        >
                           Accept
                         </button>
-                        <button className="px-5 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-xl text-sm font-semibold transition-colors">
+                        <button
+                          onClick={() => handleReject(booking)}
+                          className="px-5 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-xl text-sm font-semibold transition-colors"
+                        >
                           Reject
                         </button>
                       </>
@@ -144,10 +205,30 @@ const Bookings = () => {
                       </span>
                     )}
                     {activeTab === 'rejected' && (
-                      <div className="text-right">
-                        <span className="badge-danger mb-1">Rejected</span>
-                        {booking.reason && (
-                          <p className="text-xs text-surface-500">{booking.reason}</p>
+                      <div className="flex flex-col items-end gap-2">
+                        <div className="text-right">
+                          <span className="badge-danger mb-1">Rejected</span>
+                          {booking.reason && (
+                            <p className="text-xs text-surface-500">{booking.reason}</p>
+                          )}
+                        </div>
+                        {(isOwner || isAdmin) && (
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => handleMoveToPending(booking)}
+                              className="flex items-center gap-1.5 px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-xs font-semibold transition-colors"
+                            >
+                              <HiOutlineArrowPath className="w-3.5 h-3.5" />
+                              Move to Pending
+                            </button>
+                            <button
+                              onClick={() => handleReApprove(booking)}
+                              className="flex items-center gap-1.5 px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-xs font-semibold transition-colors"
+                            >
+                              <HiOutlineCheckCircle className="w-3.5 h-3.5" />
+                              Re-Approve
+                            </button>
+                          </div>
                         )}
                       </div>
                     )}
