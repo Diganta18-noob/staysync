@@ -24,7 +24,6 @@ export const AuthProvider = ({ children }) => {
       if (token && savedUser) {
         try {
           setUser(JSON.parse(savedUser));
-          // Verify token is still valid
           const { data } = await api.get('/auth/me');
           setUser(data.data);
           localStorage.setItem('user', JSON.stringify(data.data));
@@ -41,6 +40,18 @@ export const AuthProvider = ({ children }) => {
 
   const login = useCallback(async (email, password) => {
     const { data } = await api.post('/auth/login', { email, password });
+    const { user: userData, accessToken, refreshToken } = data.data;
+
+    localStorage.setItem('accessToken', accessToken);
+    localStorage.setItem('refreshToken', refreshToken);
+    localStorage.setItem('user', JSON.stringify(userData));
+    setUser(userData);
+
+    return userData;
+  }, []);
+
+  const adminLogin = useCallback(async (email, password) => {
+    const { data } = await api.post('/auth/admin-login', { email, password });
     const { user: userData, accessToken, refreshToken } = data.data;
 
     localStorage.setItem('accessToken', accessToken);
@@ -82,6 +93,7 @@ export const AuthProvider = ({ children }) => {
     user,
     loading,
     login,
+    adminLogin,
     register,
     logout,
     updateUser,
