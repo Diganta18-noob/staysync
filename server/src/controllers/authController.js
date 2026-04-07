@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const { logAudit } = require('../middleware/auditMiddleware');
 
 // Generate JWT tokens
 const generateTokens = (userId) => {
@@ -21,7 +22,6 @@ const register = async (req, res, next) => {
   try {
     const { name, email, password, phone } = req.body;
 
-    // Check if user exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({
@@ -30,7 +30,6 @@ const register = async (req, res, next) => {
       });
     }
 
-    // Force role to 'resident' — prevent privilege escalation
     const user = await User.create({
       name,
       email,
@@ -40,18 +39,23 @@ const register = async (req, res, next) => {
     });
 
     const { accessToken, refreshToken } = generateTokens(user._id);
-
-    // Save refresh token
     user.refreshToken = refreshToken;
     await user.save({ validateModifiedOnly: true });
 
+    // Audit log
+    req.user = user;
+    await logAudit({
+      req,
+      action: 'USER_REGISTERED',
+      targetUserId: user._id,
+      targetUserName: user.name,
+      resourceType: 'user',
+      details: { email: user.email, role: 'resident' },
+    });
+
     res.status(201).json({
       success: true,
-      data: {
-        user,
-        accessToken,
-        refreshToken,
-      },
+      data: { user, accessToken, refreshToken },
     });
   } catch (error) {
     next(error);
@@ -72,7 +76,6 @@ const login = async (req, res, next) => {
       });
     }
 
-    // Find user with password field
     const user = await User.findOne({ email }).select('+password');
     if (!user) {
       return res.status(401).json({
@@ -81,7 +84,6 @@ const login = async (req, res, next) => {
       });
     }
 
-    // Check password
     const isMatch = await user.matchPassword(password);
     if (!isMatch) {
       return res.status(401).json({
@@ -91,18 +93,78 @@ const login = async (req, res, next) => {
     }
 
     const { accessToken, refreshToken } = generateTokens(user._id);
-
-    // Save refresh token
     user.refreshToken = refreshToken;
     await user.save({ validateModifiedOnly: true });
 
+    // Audit log
+    req.user = user;
+    await logAudit({
+      req,
+      action: 'USER_LOGIN',
+      targetUserId: user._id,
+      targetUserName: user.name,
+      resourceType: 'user',
+      details: { email: user.email, role: user.role },
+    });
+
     res.json({
       success: true,
-      data: {
-        user,
-        accessToken,
-        refreshToken,
-      },
+      data: { user, accessToken, refreshToken },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Admin login
+// @route   POST /api/auth/admin-login
+// @access  Public
+const adminLogin = async (req, res, next) => {
+  try {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide admin email and password',
+      });
+    }
+
+    // Find user and verify they are an admin
+    const user = await User.findOne({ email }).select('+password');
+    if (!user || user.role !== 'admin') {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid admin credentials',
+      });
+    }
+
+    const isMatch = await user.matchPassword(password);
+    if (!isMatch) {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid admin credentials',
+      });
+    }
+
+    const { accessToken, refreshToken } = generateTokens(user._id);
+    user.refreshToken = refreshToken;
+    await user.save({ validateModifiedOnly: true });
+
+    // Audit log
+    req.user = user;
+    await logAudit({
+      req,
+      action: 'ADMIN_LOGIN',
+      targetUserId: user._id,
+      targetUserName: user.name,
+      resourceType: 'system',
+      details: { email: user.email, loginTime: new Date().toISOString() },
+    });
+
+    res.json({
+      success: true,
+      data: { user, accessToken, refreshToken },
     });
   } catch (error) {
     next(error);
@@ -115,10 +177,7 @@ const login = async (req, res, next) => {
 const getMe = async (req, res, next) => {
   try {
     const user = await User.findById(req.user._id).populate('currentRoom');
-    res.json({
-      success: true,
-      data: user,
-    });
+    res.json({ success: true, data: user });
   } catch (error) {
     next(error);
   }
@@ -152,10 +211,7 @@ const refreshAccessToken = async (req, res, next) => {
     user.refreshToken = tokens.refreshToken;
     await user.save({ validateModifiedOnly: true });
 
-    res.json({
-      success: true,
-      data: tokens,
-    });
+    res.json({ success: true, data: tokens });
   } catch (error) {
     next(error);
   }
@@ -180,10 +236,7 @@ const updateProfile = async (req, res, next) => {
       runValidators: true,
     });
 
-    res.json({
-      success: true,
-      data: user,
-    });
+    res.json({ success: true, data: user });
   } catch (error) {
     next(error);
   }
@@ -210,12 +263,7 @@ const getAllUsers = async (req, res, next) => {
     res.json({
       success: true,
       data: users,
-      pagination: {
-        page,
-        limit,
-        total,
-        pages: Math.ceil(total / limit),
-      },
+      pagination: { page, limit, total, pages: Math.ceil(total / limit) },
     });
   } catch (error) {
     next(error);
@@ -229,23 +277,29 @@ const updateUserRole = async (req, res, next) => {
   try {
     const { role } = req.body;
     if (!['admin', 'owner', 'resident'].includes(role)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid role',
-      });
+      return res.status(400).json({ success: false, message: 'Invalid role' });
     }
 
-    const user = await User.findByIdAndUpdate(
-      req.params.id,
-      { role },
-      { new: true, runValidators: true }
-    );
-
-    if (!user) {
+    const targetUser = await User.findById(req.params.id);
+    if (!targetUser) {
       return res.status(404).json({ success: false, message: 'User not found' });
     }
 
-    res.json({ success: true, data: user });
+    const previousRole = targetUser.role;
+    targetUser.role = role;
+    await targetUser.save({ validateModifiedOnly: true });
+
+    // Audit log
+    await logAudit({
+      req,
+      action: 'ROLE_CHANGED',
+      targetUserId: targetUser._id,
+      targetUserName: targetUser.name,
+      resourceType: 'user',
+      details: { previousRole, newRole: role, email: targetUser.email },
+    });
+
+    res.json({ success: true, data: targetUser });
   } catch (error) {
     next(error);
   }
@@ -258,23 +312,29 @@ const updateKycStatus = async (req, res, next) => {
   try {
     const { kycStatus } = req.body;
     if (!['pending', 'verified', 'rejected'].includes(kycStatus)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid KYC status',
-      });
+      return res.status(400).json({ success: false, message: 'Invalid KYC status' });
     }
 
-    const user = await User.findByIdAndUpdate(
-      req.params.id,
-      { kycStatus },
-      { new: true }
-    );
-
-    if (!user) {
+    const targetUser = await User.findById(req.params.id);
+    if (!targetUser) {
       return res.status(404).json({ success: false, message: 'User not found' });
     }
 
-    res.json({ success: true, data: user });
+    const previousStatus = targetUser.kycStatus;
+    targetUser.kycStatus = kycStatus;
+    await targetUser.save({ validateModifiedOnly: true });
+
+    const action = kycStatus === 'verified' ? 'KYC_APPROVED' : 'KYC_REJECTED';
+    await logAudit({
+      req,
+      action,
+      targetUserId: targetUser._id,
+      targetUserName: targetUser.name,
+      resourceType: 'user',
+      details: { previousStatus, newStatus: kycStatus, email: targetUser.email },
+    });
+
+    res.json({ success: true, data: targetUser });
   } catch (error) {
     next(error);
   }
@@ -283,6 +343,7 @@ const updateKycStatus = async (req, res, next) => {
 module.exports = {
   register,
   login,
+  adminLogin,
   getMe,
   refreshAccessToken,
   updateProfile,
