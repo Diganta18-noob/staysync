@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const softDeletePlugin = require('../utils/softDeletePlugin');
 
 const ticketSchema = new mongoose.Schema(
   {
@@ -67,5 +68,7 @@ const ticketSchema = new mongoose.Schema(
 
 ticketSchema.index({ property: 1, status: 1 });
 ticketSchema.index({ resident: 1 });
+
+ticketSchema.plugin(softDeletePlugin);
 
 module.exports = mongoose.model('Ticket', ticketSchema);

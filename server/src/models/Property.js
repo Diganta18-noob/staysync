@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const softDeletePlugin = require('../utils/softDeletePlugin');
 
 const propertySchema = new mongoose.Schema(
   {
@@ -105,5 +106,7 @@ propertySchema.virtual('rooms', {
 // Index for search
 propertySchema.index({ 'address.city': 1, amenities: 1, foodOptions: 1 });
 propertySchema.index({ title: 'text', 'address.city': 'text', 'address.street': 'text' });
+
+propertySchema.plugin(softDeletePlugin);
 
 module.exports = mongoose.model('Property', propertySchema);
