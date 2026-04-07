@@ -1,11 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import {
   HiOutlineHome, HiOutlineBuildingOffice2, HiOutlineCalendarDays,
   HiOutlineWrenchScrewdriver, HiOutlineShieldCheck, HiOutlineUserCircle,
   HiOutlineBars3, HiOutlineXMark, HiOutlineArrowRightOnRectangle,
-  HiOutlineSun, HiOutlineMoon,
+  HiOutlineSun, HiOutlineMoon, HiOutlineBell,
+  HiOutlineCheckCircle, HiOutlineCurrencyRupee, HiOutlineExclamationTriangle,
 } from 'react-icons/hi2';
 
 const navLinks = [
@@ -17,6 +18,14 @@ const navLinks = [
   { path: '/admin', label: 'Admin', icon: HiOutlineShieldCheck, admin: true },
 ];
 
+const demoNotifications = [
+  { id: 1, type: 'booking', title: 'New booking request', message: 'Amit Sharma requested Room A-102', time: '2m ago', read: false, icon: HiOutlineCalendarDays, color: 'text-blue-500 bg-blue-50 dark:bg-blue-900/30' },
+  { id: 2, type: 'payment', title: 'Payment received', message: 'Rahul Verma paid ₹8,500 for rent', time: '15m ago', read: false, icon: HiOutlineCurrencyRupee, color: 'text-emerald-500 bg-emerald-50 dark:bg-emerald-900/30' },
+  { id: 3, type: 'maintenance', title: 'New maintenance ticket', message: 'AC not working — Room B-201', time: '1h ago', read: false, icon: HiOutlineWrenchScrewdriver, color: 'text-amber-500 bg-amber-50 dark:bg-amber-900/30' },
+  { id: 4, type: 'kyc', title: 'KYC pending review', message: 'Neha Gupta submitted KYC documents', time: '2h ago', read: true, icon: HiOutlineShieldCheck, color: 'text-purple-500 bg-purple-50 dark:bg-purple-900/30' },
+  { id: 5, type: 'alert', title: 'Rent overdue', message: 'Karan Singh — ₹9,500 overdue by 3 days', time: '5h ago', read: true, icon: HiOutlineExclamationTriangle, color: 'text-red-500 bg-red-50 dark:bg-red-900/30' },
+];
+
 const Navbar = () => {
   const { user, isAuthenticated, isAdmin, logout } = useAuth();
   const location = useLocation();
@@ -24,6 +33,11 @@ const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [notifications, setNotifications] = useState(demoNotifications);
+  const notifRef = useRef(null);
+
+  const unreadCount = notifications.filter(n => !n.read).length;
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -41,7 +55,19 @@ const Navbar = () => {
 
   useEffect(() => {
     setIsOpen(false);
+    setShowNotifications(false);
   }, [location.pathname]);
+
+  // Close notification dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (notifRef.current && !notifRef.current.contains(e.target)) {
+        setShowNotifications(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const filteredLinks = navLinks.filter((link) => {
     if (link.admin) return isAdmin;
@@ -52,6 +78,18 @@ const Navbar = () => {
   const handleLogout = () => {
     logout();
     navigate('/');
+  };
+
+  const markAsRead = (id) => {
+    setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
+  };
+
+  const markAllRead = () => {
+    setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+  };
+
+  const clearNotification = (id) => {
+    setNotifications(prev => prev.filter(n => n.id !== id));
   };
 
   return (
@@ -106,8 +144,99 @@ const Navbar = () => {
                 {darkMode ? <HiOutlineSun className="w-5 h-5" /> : <HiOutlineMoon className="w-5 h-5" />}
               </button>
 
-              {isAuthenticated ? (
-                <div className="flex items-center gap-3">
+              {isAuthenticated && (
+                <>
+                  {/* Notification Bell */}
+                  <div className="relative" ref={notifRef}>
+                    <button
+                      onClick={() => setShowNotifications(!showNotifications)}
+                      className="relative p-2 rounded-xl text-surface-500 hover:bg-surface-100 dark:hover:bg-surface-800 transition-colors"
+                      title="Notifications"
+                    >
+                      <HiOutlineBell className="w-5 h-5" />
+                      {unreadCount > 0 && (
+                        <span className="absolute top-1 right-1 w-4 h-4 bg-red-500 rounded-full text-[10px] text-white font-bold flex items-center justify-center animate-scale-in">
+                          {unreadCount}
+                        </span>
+                      )}
+                    </button>
+
+                    {/* Notification Dropdown */}
+                    {showNotifications && (
+                      <div className="absolute right-0 top-full mt-2 w-96 bg-white dark:bg-surface-900 rounded-2xl shadow-2xl border border-surface-200 dark:border-surface-700 z-50 animate-fade-in-down overflow-hidden">
+                        <div className="flex items-center justify-between px-5 py-4 border-b border-surface-100 dark:border-surface-800">
+                          <h3 className="font-display font-bold text-surface-900 dark:text-white text-sm">
+                            Notifications
+                            {unreadCount > 0 && (
+                              <span className="ml-2 px-2 py-0.5 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 text-xs rounded-full font-bold">
+                                {unreadCount} new
+                              </span>
+                            )}
+                          </h3>
+                          {unreadCount > 0 && (
+                            <button
+                              onClick={markAllRead}
+                              className="text-xs text-primary-600 hover:text-primary-700 font-semibold"
+                            >
+                              Mark all read
+                            </button>
+                          )}
+                        </div>
+
+                        <div className="max-h-96 overflow-y-auto">
+                          {notifications.length === 0 ? (
+                            <div className="py-10 text-center">
+                              <HiOutlineBell className="w-10 h-10 text-surface-300 mx-auto mb-2" />
+                              <p className="text-sm text-surface-500">No notifications</p>
+                            </div>
+                          ) : (
+                            notifications.map((notif) => (
+                              <div
+                                key={notif.id}
+                                className={`flex items-start gap-3 px-5 py-3.5 hover:bg-surface-50 dark:hover:bg-surface-800/50 transition-colors cursor-pointer border-b border-surface-50 dark:border-surface-800 last:border-0 ${
+                                  !notif.read ? 'bg-primary-50/30 dark:bg-primary-900/10' : ''
+                                }`}
+                                onClick={() => markAsRead(notif.id)}
+                              >
+                                <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${notif.color}`}>
+                                  <notif.icon className="w-4 h-4" />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-start justify-between gap-2">
+                                    <p className={`text-sm ${!notif.read ? 'font-semibold text-surface-900 dark:text-white' : 'font-medium text-surface-700 dark:text-surface-300'}`}>
+                                      {notif.title}
+                                    </p>
+                                    <button
+                                      onClick={(e) => { e.stopPropagation(); clearNotification(notif.id); }}
+                                      className="text-surface-400 hover:text-red-500 transition-colors flex-shrink-0"
+                                    >
+                                      <HiOutlineXMark className="w-3.5 h-3.5" />
+                                    </button>
+                                  </div>
+                                  <p className="text-xs text-surface-500 mt-0.5 truncate">{notif.message}</p>
+                                  <p className="text-xs text-surface-400 mt-1">{notif.time}</p>
+                                </div>
+                                {!notif.read && (
+                                  <div className="w-2 h-2 bg-primary-500 rounded-full flex-shrink-0 mt-2" />
+                                )}
+                              </div>
+                            ))
+                          )}
+                        </div>
+
+                        <div className="px-5 py-3 border-t border-surface-100 dark:border-surface-800 text-center">
+                          <Link
+                            to="/dashboard"
+                            onClick={() => setShowNotifications(false)}
+                            className="text-xs text-primary-600 hover:text-primary-700 font-semibold"
+                          >
+                            View all notifications →
+                          </Link>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
                   <Link
                     to="/profile"
                     className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-surface-100 dark:hover:bg-surface-800 transition-colors"
@@ -131,8 +260,10 @@ const Navbar = () => {
                   >
                     <HiOutlineArrowRightOnRectangle className="w-5 h-5" />
                   </button>
-                </div>
-              ) : (
+                </>
+              )}
+
+              {!isAuthenticated && (
                 <div className="flex items-center gap-2">
                   <Link to="/login" className="btn-ghost text-sm py-2 px-4">
                     Sign In
