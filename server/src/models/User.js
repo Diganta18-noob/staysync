@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
+const softDeletePlugin = require('../utils/softDeletePlugin');
 
 const userSchema = new mongoose.Schema(
   {
@@ -80,5 +81,8 @@ userSchema.methods.toJSON = function () {
   delete user.refreshToken;
   return user;
 };
+
+// Apply soft-delete plugin
+userSchema.plugin(softDeletePlugin);
 
 module.exports = mongoose.model('User', userSchema);
