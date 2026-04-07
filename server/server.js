@@ -3,6 +3,7 @@ const http = require('http');
 const { Server } = require('socket.io');
 const app = require('./src/app');
 const connectDB = require('./src/config/db');
+const seedAdmin = require('./src/utils/seedAdmin');
 
 const PORT = process.env.PORT || 5000;
 
@@ -41,6 +42,7 @@ io.on('connection', (socket) => {
 // Connect to database and start server
 const startServer = async () => {
   await connectDB();
+  await seedAdmin();
 
   server.listen(PORT, () => {
     console.log(`\n🏠 StaySync API Server`);
