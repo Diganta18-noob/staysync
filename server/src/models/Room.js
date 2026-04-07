@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const softDeletePlugin = require('../utils/softDeletePlugin');
 
 const roomSchema = new mongoose.Schema(
   {
@@ -88,5 +89,7 @@ roomSchema.methods.unlock = function () {
 
 // Index
 roomSchema.index({ property: 1, roomNumber: 1 }, { unique: true });
+
+roomSchema.plugin(softDeletePlugin);
 
 module.exports = mongoose.model('Room', roomSchema);
