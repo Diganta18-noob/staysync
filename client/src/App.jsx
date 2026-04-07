@@ -13,6 +13,7 @@ import PropertyDetail from './pages/PropertyDetail';
 import Bookings from './pages/Bookings';
 import Maintenance from './pages/Maintenance';
 import AdminPanel from './pages/AdminPanel';
+import AdminLogin from './pages/AdminLogin';
 import Profile from './pages/Profile';
 
 const queryClient = new QueryClient({
@@ -39,6 +40,7 @@ function App() {
               <Route path="/register" element={<Register />} />
               <Route path="/properties" element={<Properties />} />
               <Route path="/properties/:id" element={<PropertyDetail />} />
+              <Route path="/admin-login" element={<AdminLogin />} />
 
               {/* Protected Routes */}
               <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
