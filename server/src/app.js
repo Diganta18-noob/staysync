@@ -13,6 +13,7 @@ const ticketRoutes = require('./routes/ticketRoutes');
 const roomRoutes = require('./routes/roomRoutes');
 const auditRoutes = require('./routes/auditRoutes');
 const paymentRoutes = require('./routes/paymentRoutes');
+const dashboardRoutes = require('./routes/dashboardRoutes');
 
 const app = express();
 
@@ -55,6 +56,7 @@ app.use('/api/bookings', bookingRoutes);
 app.use('/api/tickets', ticketRoutes);
 app.use('/api/audit', auditRoutes);
 app.use('/api/payments', paymentRoutes);
+app.use('/api/dashboard', dashboardRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
