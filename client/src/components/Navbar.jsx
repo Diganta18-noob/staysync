@@ -1,11 +1,12 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import ThemeSwitcher from './ThemeSwitcher';
 import {
   HiOutlineHome, HiOutlineBuildingOffice2, HiOutlineCalendarDays,
   HiOutlineWrenchScrewdriver, HiOutlineShieldCheck, HiOutlineUserCircle,
   HiOutlineBars3, HiOutlineXMark, HiOutlineArrowRightOnRectangle,
-  HiOutlineSun, HiOutlineMoon, HiOutlineBell,
+  HiOutlineBell,
   HiOutlineCheckCircle, HiOutlineCurrencyRupee, HiOutlineExclamationTriangle,
 } from 'react-icons/hi2';
 
@@ -32,7 +33,6 @@ const Navbar = () => {
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [darkMode, setDarkMode] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [notifications, setNotifications] = useState(demoNotifications);
   const notifRef = useRef(null);
@@ -45,13 +45,7 @@ const Navbar = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  useEffect(() => {
-    if (darkMode) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  }, [darkMode]);
+
 
   useEffect(() => {
     setIsOpen(false);
@@ -136,13 +130,7 @@ const Navbar = () => {
 
             {/* Right side */}
             <div className="hidden lg:flex items-center gap-3">
-              <button
-                onClick={() => setDarkMode(!darkMode)}
-                className="p-2 rounded-xl text-surface-500 hover:bg-surface-100 dark:hover:bg-surface-800 transition-colors"
-                title="Toggle dark mode"
-              >
-                {darkMode ? <HiOutlineSun className="w-5 h-5" /> : <HiOutlineMoon className="w-5 h-5" />}
-              </button>
+              <ThemeSwitcher />
 
               {isAuthenticated && (
                 <>

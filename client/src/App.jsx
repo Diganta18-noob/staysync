@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from './context/AuthContext';
+import { ThemeProvider } from './context/ThemeContext';
 import Navbar from './components/Navbar';
 import PrivateRoute from './components/PrivateRoute';
 import AdminRoute from './components/AdminRoute';
@@ -29,31 +30,33 @@ const queryClient = new QueryClient({
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <Router>
-          <div className="min-h-screen bg-surface-50 dark:bg-surface-950">
-            <Navbar />
-            <Routes>
-              {/* Public Routes */}
-              <Route path="/" element={<Home />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
-              <Route path="/properties" element={<Properties />} />
-              <Route path="/properties/:id" element={<PropertyDetail />} />
-              <Route path="/admin-login" element={<AdminLogin />} />
+      <ThemeProvider>
+        <AuthProvider>
+          <Router>
+            <div className="min-h-screen bg-surface-50 dark:bg-surface-950">
+              <Navbar />
+              <Routes>
+                {/* Public Routes */}
+                <Route path="/" element={<Home />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
+                <Route path="/properties" element={<Properties />} />
+                <Route path="/properties/:id" element={<PropertyDetail />} />
+                <Route path="/admin-login" element={<AdminLogin />} />
 
-              {/* Protected Routes */}
-              <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
-              <Route path="/bookings" element={<PrivateRoute><Bookings /></PrivateRoute>} />
-              <Route path="/maintenance" element={<PrivateRoute><Maintenance /></PrivateRoute>} />
-              <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
+                {/* Protected Routes */}
+                <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
+                <Route path="/bookings" element={<PrivateRoute><Bookings /></PrivateRoute>} />
+                <Route path="/maintenance" element={<PrivateRoute><Maintenance /></PrivateRoute>} />
+                <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
 
-              {/* Admin Routes */}
-              <Route path="/admin" element={<AdminRoute><AdminPanel /></AdminRoute>} />
-            </Routes>
-          </div>
-        </Router>
-      </AuthProvider>
+                {/* Admin Routes */}
+                <Route path="/admin" element={<AdminRoute><AdminPanel /></AdminRoute>} />
+              </Routes>
+            </div>
+          </Router>
+        </AuthProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }
