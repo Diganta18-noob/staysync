@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import ThemeSwitcher from './ThemeSwitcher';
+import GlobalSearch from './GlobalSearch';
 import {
   HiOutlineHome, HiOutlineBuildingOffice2, HiOutlineCalendarDays,
   HiOutlineWrenchScrewdriver, HiOutlineShieldCheck, HiOutlineUserCircle,
@@ -130,6 +131,7 @@ const Navbar = () => {
 
             {/* Right side */}
             <div className="hidden lg:flex items-center gap-3">
+              <GlobalSearch />
               <ThemeSwitcher />
 
               {isAuthenticated && (
