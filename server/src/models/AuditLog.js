@@ -9,9 +9,13 @@ const auditLogSchema = new mongoose.Schema(
         'ADMIN_LOGIN', 'USER_LOGIN', 'USER_REGISTERED',
         'ROLE_CHANGED', 'KYC_APPROVED', 'KYC_REJECTED',
         'PROPERTY_CREATED', 'PROPERTY_UPDATED', 'PROPERTY_DELETED',
-        'BOOKING_CREATED', 'BOOKING_CANCELLED',
+        'BOOKING_CREATED', 'BOOKING_CANCELLED', 'BOOKING_APPROVED',
         'TICKET_CREATED', 'TICKET_RESOLVED',
         'USER_DELETED', 'SETTINGS_UPDATED',
+        'PAYMENT_CREATED', 'PAYMENT_RECORDED', 'PAYMENT_OVERDUE',
+        'PERMISSION_CHANGED', 'REPORT_GENERATED', 'EXPORT_PDF',
+        'ROOM_CREATED', 'ROOM_UPDATED', 'ROOM_DELETED', 'ROOM_LOCKED',
+        'DATA_EXPORT', 'ACCOUNT_DELETED',
       ],
       index: true,
     },
@@ -50,6 +54,13 @@ const auditLogSchema = new mongoose.Schema(
     ipAddress: {
       type: String,
       default: 'unknown',
+    },
+    userAgent: {
+      type: String,
+      default: 'unknown',
+    },
+    sessionId: {
+      type: String,
     },
   },
   {
