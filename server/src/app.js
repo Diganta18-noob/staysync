@@ -17,6 +17,7 @@ const auditRoutes = require('./routes/auditRoutes');
 const paymentRoutes = require('./routes/paymentRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
 const searchRoutes = require('./routes/searchRoutes');
+const scopeChangeRoutes = require('./routes/scopeChangeRoutes');
 
 const app = express();
 
@@ -63,6 +64,7 @@ app.use('/api/audit', auditRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/search', searchRoutes);
+app.use('/api/scope-changes', scopeChangeRoutes);
 
 // GDPR compliance routes
 const { protect } = require('./middleware/auth');

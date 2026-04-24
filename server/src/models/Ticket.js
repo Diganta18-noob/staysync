@@ -30,7 +30,7 @@ const ticketSchema = new mongoose.Schema(
     },
     category: {
       type: String,
-      enum: ['plumbing', 'electrical', 'cleaning', 'furniture', 'appliance', 'internet', 'other'],
+      enum: ['plumbing', 'electrical', 'cleaning', 'furniture', 'appliance', 'internet', 'bug', 'defect', 'feature', 'scope-change', 'other'],
       default: 'other',
     },
     priority: {
@@ -58,6 +58,15 @@ const ticketSchema = new mongoose.Schema(
     },
     resolutionNotes: {
       type: String,
+      default: '',
+    },
+    estimatedHours: {
+      type: Number,
+      min: 0,
+    },
+    resolution: {
+      type: String,
+      enum: ['fixed', 'wont-fix', 'duplicate', 'deferred', 'not-a-bug', ''],
       default: '',
     },
   },
