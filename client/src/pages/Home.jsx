@@ -1,11 +1,32 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   HiOutlineBuildingOffice2, HiOutlineShieldCheck, HiOutlineCreditCard,
   HiOutlineChartBarSquare, HiOutlineWrenchScrewdriver, HiOutlineUserGroup,
   HiOutlineGlobeAlt, HiOutlineBolt, HiOutlineDevicePhoneMobile,
   HiOutlineCheckCircle, HiOutlineStar, HiOutlineArrowRight,
 } from 'react-icons/hi2';
+
+const fadeUpVariant = {
+  hidden: { opacity: 0, y: 15, filter: "blur(4px)" },
+  visible: { 
+    opacity: 1, 
+    y: 0, 
+    filter: "blur(0px)",
+    transition: { type: "spring", duration: 0.45, bounce: 0 }
+  }
+};
+
+const staggerContainer = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1
+    }
+  }
+};
 
 const stats = [
   { label: 'Beds Managed', value: '12,000+', icon: '🛏️' },
@@ -122,24 +143,6 @@ const AnimatedCounter = ({ end, suffix = '' }) => {
 };
 
 const Home = () => {
-  const [visibleSections, setVisibleSections] = useState(new Set());
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setVisibleSections((prev) => new Set([...prev, entry.target.id]));
-          }
-        });
-      },
-      { threshold: 0.1 }
-    );
-
-    document.querySelectorAll('[data-animate]').forEach((el) => observer.observe(el));
-    return () => observer.disconnect();
-  }, []);
-
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
@@ -154,48 +157,63 @@ const Home = () => {
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary-500/10 rounded-full blur-3xl" />
 
         {/* Content */}
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+        <motion.div 
+          className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20"
+          variants={staggerContainer}
+          initial="hidden"
+          animate="visible"
+        >
           <div className="max-w-3xl mx-auto text-center">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white text-sm font-medium mb-8 animate-fade-in">
+            <motion.div variants={fadeUpVariant} className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white text-sm font-medium mb-8">
               <HiOutlineBolt className="w-4 h-4" />
               India's #1 PG Management Platform
-            </div>
+            </motion.div>
 
-            <h1 className="text-4xl sm:text-5xl lg:text-7xl font-display font-bold text-white leading-tight mb-6 animate-fade-in-up">
+            <motion.h1 variants={fadeUpVariant} className="text-4xl sm:text-5xl lg:text-7xl font-display font-bold text-white leading-tight mb-6">
               Manage Your PG
               <br />
               <span className="bg-gradient-to-r from-amber-300 via-yellow-200 to-amber-300 bg-clip-text text-transparent">
                 Like Never Before
               </span>
-            </h1>
+            </motion.h1>
 
-            <p className="text-lg sm:text-xl text-white/80 max-w-2xl mx-auto mb-10 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
+            <motion.p variants={fadeUpVariant} className="text-lg sm:text-xl text-white/80 max-w-2xl mx-auto mb-10">
               Replace registers, WhatsApp groups, and manual tracking with a single,
               powerful dashboard. Automated billing, KYC, maintenance — all in one place.
-            </p>
+            </motion.p>
 
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
-              <Link
-                to="/register"
-                className="inline-flex items-center gap-2 px-8 py-4 bg-white text-primary-700 font-bold rounded-2xl shadow-2xl hover:shadow-3xl hover:-translate-y-1 transition-all duration-300 text-lg group"
-              >
-                Start Free Trial
-                <HiOutlineArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-              </Link>
-              <Link
-                to="/properties"
-                className="inline-flex items-center gap-2 px-8 py-4 bg-white/10 backdrop-blur-sm text-white font-semibold rounded-2xl border border-white/20 hover:bg-white/20 transition-all duration-300 text-lg"
-              >
-                <HiOutlineGlobeAlt className="w-5 h-5" />
-                Explore Properties
-              </Link>
-            </div>
+            <motion.div variants={fadeUpVariant} className="flex flex-col sm:flex-row items-center justify-center gap-4">
+              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                <Link
+                  to="/register"
+                  className="inline-flex items-center gap-2 px-8 py-4 bg-white text-primary-700 font-bold rounded-2xl shadow-2xl hover:shadow-3xl transition-shadow duration-300 text-lg group"
+                >
+                  Start Free Trial
+                  <HiOutlineArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                </Link>
+              </motion.div>
+              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                <Link
+                  to="/properties"
+                  className="inline-flex items-center gap-2 px-8 py-4 bg-white/10 backdrop-blur-sm text-white font-semibold rounded-2xl border border-white/20 hover:bg-white/20 transition-colors duration-300 text-lg"
+                >
+                  <HiOutlineGlobeAlt className="w-5 h-5" />
+                  Explore Properties
+                </Link>
+              </motion.div>
+            </motion.div>
           </div>
-        </div>
+        </motion.div>
       </section>
 
       {/* Stats Bar */}
-      <section className="relative -mt-16 z-20 max-w-5xl mx-auto px-4">
+      <motion.section 
+        className="relative -mt-16 z-20 max-w-5xl mx-auto px-4"
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.8 }}
+        transition={{ type: "spring", duration: 0.5, delay: 0.2 }}
+      >
         <div className="glass-card p-2">
           <div className="grid grid-cols-2 lg:grid-cols-4">
             {stats.map((stat, i) => (
@@ -214,60 +232,77 @@ const Home = () => {
             ))}
           </div>
         </div>
-      </section>
+      </motion.section>
 
       {/* Features */}
-      <section
-        id="features"
-        data-animate
-        className="py-24 lg:py-32 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"
-      >
-        <div className="text-center mb-16">
-          <span className="badge-primary text-sm mb-4 inline-block">Features</span>
-          <h2 className="text-3xl lg:text-5xl font-display font-bold text-surface-900 dark:text-white mb-4">
+      <section id="features" className="py-24 lg:py-32 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <motion.div 
+          className="text-center mb-16"
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.3 }}
+          variants={staggerContainer}
+        >
+          <motion.span variants={fadeUpVariant} className="badge-primary text-sm mb-4 inline-block">Features</motion.span>
+          <motion.h2 variants={fadeUpVariant} className="text-3xl lg:text-5xl font-display font-bold text-surface-900 dark:text-white mb-4">
             Everything You Need to
             <br />
             <span className="gradient-text">Run a Modern PG</span>
-          </h2>
-          <p className="text-lg text-surface-500 max-w-2xl mx-auto">
+          </motion.h2>
+          <motion.p variants={fadeUpVariant} className="text-lg text-surface-500 max-w-2xl mx-auto">
             From property listing to rent collection, maintenance to analytics — StaySync handles it all.
-          </p>
-        </div>
+          </motion.p>
+        </motion.div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <motion.div 
+          className="grid md:grid-cols-2 lg:grid-cols-3 gap-6"
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.1 }}
+          variants={staggerContainer}
+        >
           {features.map((feature, i) => (
-            <div
+            <motion.div
               key={feature.title}
-              className={`glass-card-hover p-8 group ${
-                visibleSections.has('features') ? 'animate-fade-in-up' : 'opacity-0'
-              }`}
-              style={{ animationDelay: `${i * 0.1}s` }}
+              variants={fadeUpVariant}
+              whileHover={{ y: -5, transition: { duration: 0.2 } }}
+              className="glass-card-hover p-8 group"
             >
-              <div
-                className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${feature.color} flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300 shadow-lg`}
-              >
+              <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${feature.color} flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300 shadow-lg`}>
                 <feature.icon className="w-7 h-7 text-white" />
               </div>
               <h3 className="text-xl font-display font-bold text-surface-900 dark:text-white mb-3">
                 {feature.title}
               </h3>
               <p className="text-surface-500 leading-relaxed">{feature.desc}</p>
-            </div>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       </section>
 
       {/* How It Works */}
       <section className="py-24 bg-surface-50 dark:bg-surface-900/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <span className="badge-primary text-sm mb-4 inline-block">How It Works</span>
-            <h2 className="text-3xl lg:text-5xl font-display font-bold text-surface-900 dark:text-white mb-4">
+          <motion.div 
+            className="text-center mb-16"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.5 }}
+            variants={staggerContainer}
+          >
+            <motion.span variants={fadeUpVariant} className="badge-primary text-sm mb-4 inline-block">How It Works</motion.span>
+            <motion.h2 variants={fadeUpVariant} className="text-3xl lg:text-5xl font-display font-bold text-surface-900 dark:text-white mb-4">
               Get Started in <span className="gradient-text">3 Simple Steps</span>
-            </h2>
-          </div>
+            </motion.h2>
+          </motion.div>
 
-          <div className="grid md:grid-cols-3 gap-8">
+          <motion.div 
+            className="grid md:grid-cols-3 gap-8"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.3 }}
+            variants={staggerContainer}
+          >
             {[
               {
                 step: '01',
@@ -288,7 +323,11 @@ const Home = () => {
                 icon: HiOutlineChartBarSquare,
               },
             ].map((item, i) => (
-              <div key={item.step} className="relative text-center group">
+              <motion.div 
+                key={item.step} 
+                className="relative text-center group"
+                variants={fadeUpVariant}
+              >
                 <div className="mx-auto w-20 h-20 rounded-3xl bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center mb-6 shadow-xl group-hover:scale-110 transition-transform duration-300">
                   <item.icon className="w-10 h-10 text-white" />
                 </div>
@@ -303,33 +342,39 @@ const Home = () => {
                     <HiOutlineArrowRight className="w-6 h-6" />
                   </div>
                 )}
-              </div>
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
         </div>
       </section>
 
       {/* Testimonials */}
-      <section
-        id="testimonials"
-        data-animate
-        className="py-24 lg:py-32 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"
-      >
-        <div className="text-center mb-16">
-          <span className="badge-primary text-sm mb-4 inline-block">Testimonials</span>
-          <h2 className="text-3xl lg:text-5xl font-display font-bold text-surface-900 dark:text-white mb-4">
+      <section id="testimonials" className="py-24 lg:py-32 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <motion.div 
+          className="text-center mb-16"
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.5 }}
+          variants={staggerContainer}
+        >
+          <motion.span variants={fadeUpVariant} className="badge-primary text-sm mb-4 inline-block">Testimonials</motion.span>
+          <motion.h2 variants={fadeUpVariant} className="text-3xl lg:text-5xl font-display font-bold text-surface-900 dark:text-white mb-4">
             Trusted by <span className="gradient-text">800+ Property Owners</span>
-          </h2>
-        </div>
+          </motion.h2>
+        </motion.div>
 
-        <div className="grid md:grid-cols-3 gap-6">
+        <motion.div 
+          className="grid md:grid-cols-3 gap-6"
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.2 }}
+          variants={staggerContainer}
+        >
           {testimonials.map((t, i) => (
-            <div
+            <motion.div
               key={t.name}
-              className={`glass-card p-8 ${
-                visibleSections.has('testimonials') ? 'animate-fade-in-up' : 'opacity-0'
-              }`}
-              style={{ animationDelay: `${i * 0.15}s` }}
+              variants={fadeUpVariant}
+              className="glass-card p-8"
             >
               <div className="flex gap-1 mb-4">
                 {Array.from({ length: t.rating }).map((_, j) => (
@@ -348,15 +393,21 @@ const Home = () => {
                   <p className="text-sm text-surface-500">{t.role}</p>
                 </div>
               </div>
-            </div>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       </section>
 
       {/* CTA */}
       <section className="py-24">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-primary-600 via-primary-700 to-accent-700 p-12 lg:p-16 text-center">
+          <motion.div 
+            className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-primary-600 via-primary-700 to-accent-700 p-12 lg:p-16 text-center"
+            initial={{ opacity: 0, scale: 0.95 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ type: "spring", duration: 0.6, bounce: 0 }}
+          >
             <div className="absolute inset-0 bg-card-shine animate-shimmer" />
             <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-32 translate-x-32" />
             <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full translate-y-24 -translate-x-24" />
@@ -370,22 +421,26 @@ const Home = () => {
                 Start your free trial today.
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                <Link
-                  to="/register"
-                  className="inline-flex items-center gap-2 px-8 py-4 bg-white text-primary-700 font-bold rounded-2xl shadow-2xl hover:-translate-y-1 transition-all duration-300 text-lg group"
-                >
-                  Get Started Free
-                  <HiOutlineArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                </Link>
-                <Link
-                  to="/properties"
-                  className="inline-flex items-center gap-2 px-8 py-4 text-white font-semibold rounded-2xl border-2 border-white/30 hover:bg-white/10 transition-all duration-300 text-lg"
-                >
-                  View Demo
-                </Link>
+                <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                  <Link
+                    to="/register"
+                    className="inline-flex items-center gap-2 px-8 py-4 bg-white text-primary-700 font-bold rounded-2xl shadow-2xl hover:shadow-3xl transition-shadow duration-300 text-lg group"
+                  >
+                    Get Started Free
+                    <HiOutlineArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                  </Link>
+                </motion.div>
+                <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                  <Link
+                    to="/properties"
+                    className="inline-flex items-center gap-2 px-8 py-4 text-white font-semibold rounded-2xl border-2 border-white/30 hover:bg-white/10 transition-colors duration-300 text-lg"
+                  >
+                    View Demo
+                  </Link>
+                </motion.div>
               </div>
             </div>
-          </div>
+          </motion.div>
         </div>
       </section>
 
@@ -451,3 +506,4 @@ const Home = () => {
 };
 
 export default Home;
+

@@ -9,9 +9,10 @@ import {
   HiOutlineArrowPath, HiOutlineChevronLeft, HiOutlineChevronRight,
   HiOutlineArrowTrendingUp, HiOutlineArrowTrendingDown,
   HiOutlineBuildingOffice2, HiOutlineEye, HiOutlineBell,
-  HiOutlineLockClosed, HiOutlinePaintBrush, HiOutlineGlobeAlt,
   HiOutlineEnvelope, HiOutlineServerStack, HiOutlineCreditCard,
+  HiOutlineDocumentArrowDown,
 } from 'react-icons/hi2';
+import { generateAuditReport, generatePaymentReport } from '../utils/pdfGenerator';
 
 const sections = [
   { key: 'users', label: 'User Ledger', icon: HiOutlineUserGroup },
@@ -326,6 +327,14 @@ const AdminPanel = () => {
                       System Audit Trail
                     </h2>
                     <div className="flex items-center gap-2">
+                      <button 
+                        onClick={() => generateAuditReport(auditLogs)}
+                        disabled={auditLogs.length === 0}
+                        className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium transition-colors bg-surface-100 dark:bg-surface-800 text-surface-600 dark:text-surface-300 hover:bg-surface-200"
+                      >
+                        <HiOutlineDocumentArrowDown className="w-4 h-4" />
+                        Export
+                      </button>
                       <div className="relative">
                         <HiOutlineMagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-surface-400" />
                         <input value={auditSearch} onChange={(e) => { setAuditSearch(e.target.value); setAuditPage(1); }} className="input-field pl-10 py-2 text-sm w-48" placeholder="Search logs..." />
@@ -472,7 +481,16 @@ const AdminPanel = () => {
                 {/* Transactions Table */}
                 <div className="glass-card p-6">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-                    <h3 className="text-lg font-display font-bold text-surface-900 dark:text-white">Transaction History</h3>
+                    <div className="flex items-center gap-4">
+                      <h3 className="text-lg font-display font-bold text-surface-900 dark:text-white">Transaction History</h3>
+                      <button 
+                        onClick={() => generatePaymentReport(filteredTransactions, 'Revenue Audit Report')}
+                        className="flex items-center gap-2 px-3 py-1 rounded-lg text-xs font-medium transition-colors bg-primary-50 dark:bg-primary-900/30 text-primary-600 hover:bg-primary-100"
+                      >
+                        <HiOutlineDocumentArrowDown className="w-4 h-4" />
+                        Export PDF
+                      </button>
+                    </div>
                     <div className="flex gap-1 p-1 bg-surface-100 dark:bg-surface-800 rounded-xl">
                       {['all', 'paid', 'pending', 'overdue'].map(f => (
                         <button key={f} onClick={() => setRevenueFilter(f)} className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors capitalize ${revenueFilter === f ? 'bg-white dark:bg-surface-700 text-surface-900 dark:text-white shadow-sm' : 'text-surface-500'}`}>

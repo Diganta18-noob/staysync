@@ -96,20 +96,22 @@ const Navbar = () => {
             : 'bg-transparent'
         }`}
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16 lg:h-18">
+        <div className="w-full mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16 lg:h-18 gap-4">
             {/* Logo */}
-            <Link to="/" className="flex items-center gap-2 group">
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center shadow-lg shadow-primary-500/25 group-hover:shadow-primary-500/40 transition-shadow duration-300">
-                <span className="text-white font-bold text-sm">SS</span>
-              </div>
-              <span className="text-xl font-display font-bold text-surface-900 dark:text-white">
-                Stay<span className="gradient-text">Sync</span>
-              </span>
-            </Link>
+            <div className="flex-1 flex justify-start">
+              <Link to="/" className="flex items-center gap-2 group">
+                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center shadow-lg shadow-primary-500/25 group-hover:shadow-primary-500/40 transition-shadow duration-300">
+                  <span className="text-white font-bold text-sm">SS</span>
+                </div>
+                <span className="text-xl font-display font-bold text-surface-900 dark:text-white">
+                  Stay<span className="gradient-text">Sync</span>
+                </span>
+              </Link>
+            </div>
 
             {/* Desktop Nav */}
-            <div className="hidden lg:flex items-center gap-1">
+            <div className="hidden lg:flex flex-[2] justify-center items-center gap-2">
               {filteredLinks.map((link) => {
                 const isActive = location.pathname === link.path;
                 return (
@@ -130,7 +132,7 @@ const Navbar = () => {
             </div>
 
             {/* Right side */}
-            <div className="hidden lg:flex items-center gap-3">
+            <div className="hidden lg:flex flex-1 justify-end items-center gap-3">
               <GlobalSearch />
               <ThemeSwitcher />
 

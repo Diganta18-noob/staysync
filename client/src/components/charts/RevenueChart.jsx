@@ -4,6 +4,7 @@ import {
   Filler, Title, Tooltip, Legend,
 } from 'chart.js';
 import { Line } from 'react-chartjs-2';
+import { useTheme } from '../../context/ThemeContext';
 
 ChartJS.register(
   CategoryScale, LinearScale, PointElement, LineElement,
@@ -11,6 +12,10 @@ ChartJS.register(
 );
 
 const RevenueChart = ({ labels = [], values = [], loading = false }) => {
+  const { currentTheme } = useTheme(); // forces re-render on theme change
+  const { h, s } = currentTheme?.primary || { h: 239, s: 84 };
+  const primaryColor = `${h} ${s}% 56%`;
+
   if (loading) {
     return <div className="h-64 skeleton rounded-xl" />;
   }
@@ -21,18 +26,22 @@ const RevenueChart = ({ labels = [], values = [], loading = false }) => {
       {
         label: 'Revenue (₹)',
         data: values,
-        borderColor: 'hsl(var(--chart-primary, 239 84% 67%))',
-        backgroundColor: (ctx) => {
-          const gradient = ctx.chart.ctx.createLinearGradient(0, 0, 0, ctx.chart.height);
-          gradient.addColorStop(0, 'hsla(239, 84%, 67%, 0.3)');
-          gradient.addColorStop(1, 'hsla(239, 84%, 67%, 0.02)');
+        borderColor: `hsl(${primaryColor})`,
+        backgroundColor: (context) => {
+          const chart = context.chart;
+          const { ctx, chartArea } = chart;
+          if (!chartArea) return 'rgba(99, 102, 241, 0.1)';
+          
+          const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+          gradient.addColorStop(0, `hsl(${primaryColor} / 0.3)`);
+          gradient.addColorStop(1, `hsl(${primaryColor} / 0.02)`);
           return gradient;
         },
         fill: true,
         tension: 0.4,
         borderWidth: 2.5,
         pointBackgroundColor: '#fff',
-        pointBorderColor: 'hsl(239, 84%, 67%)',
+        pointBorderColor: `hsl(${primaryColor})`,
         pointBorderWidth: 2,
         pointRadius: 4,
         pointHoverRadius: 6,

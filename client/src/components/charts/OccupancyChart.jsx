@@ -2,13 +2,20 @@ import {
   Chart as ChartJS, ArcElement, Tooltip, Legend,
 } from 'chart.js';
 import { Doughnut } from 'react-chartjs-2';
+import { useTheme } from '../../context/ThemeContext';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 const OccupancyChart = ({ data = [], loading = false }) => {
+  const { currentTheme } = useTheme();
+
   if (loading) {
     return <div className="h-56 w-56 mx-auto skeleton rounded-full" />;
   }
+
+  const { h, s } = currentTheme?.primary || { h: 160, s: 84 };
+  const primaryColor = `${h} ${s}% 56%`;
+  const primaryDarkColor = `${h} ${s}% 46%`;
 
   const totalOccupied = data.reduce((sum, d) => sum + d.occupied, 0);
   const totalVacant = data.reduce((sum, d) => sum + d.vacant, 0);
@@ -19,11 +26,11 @@ const OccupancyChart = ({ data = [], loading = false }) => {
       {
         data: [totalOccupied, totalVacant],
         backgroundColor: [
-          'hsl(160, 84%, 39%)',  // emerald
+          `hsl(${primaryColor})`,
           'hsl(220, 14%, 76%)', // surface-300
         ],
         borderColor: [
-          'hsl(160, 84%, 35%)',
+          `hsl(${primaryDarkColor})`,
           'hsl(220, 14%, 70%)',
         ],
         borderWidth: 2,
@@ -70,7 +77,7 @@ const OccupancyChart = ({ data = [], loading = false }) => {
       {/* Legend */}
       <div className="flex gap-6 mt-4">
         <div className="flex items-center gap-2">
-          <div className="w-3 h-3 rounded-full bg-emerald-500" />
+          <div className="w-3 h-3 rounded-full bg-primary-500" />
           <span className="text-sm text-surface-600 dark:text-surface-400">
             Occupied ({totalOccupied})
           </span>

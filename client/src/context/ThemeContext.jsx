@@ -34,17 +34,17 @@ const presetThemes = {
 function generatePalette(hsl, name) {
   const { h, s } = hsl;
   return {
-    [`--color-${name}-50`]:  `hsl(${h}, ${Math.min(s, 100)}%, 97%)`,
-    [`--color-${name}-100`]: `hsl(${h}, ${Math.min(s, 100)}%, 93%)`,
-    [`--color-${name}-200`]: `hsl(${h}, ${Math.min(s, 95)}%, 86%)`,
-    [`--color-${name}-300`]: `hsl(${h}, ${Math.min(s, 90)}%, 76%)`,
-    [`--color-${name}-400`]: `hsl(${h}, ${Math.min(s, 85)}%, 66%)`,
-    [`--color-${name}-500`]: `hsl(${h}, ${s}%, 56%)`,
-    [`--color-${name}-600`]: `hsl(${h}, ${s}%, 46%)`,
-    [`--color-${name}-700`]: `hsl(${h}, ${Math.min(s, 90)}%, 38%)`,
-    [`--color-${name}-800`]: `hsl(${h}, ${Math.min(s, 85)}%, 30%)`,
-    [`--color-${name}-900`]: `hsl(${h}, ${Math.min(s, 80)}%, 22%)`,
-    [`--color-${name}-950`]: `hsl(${h}, ${Math.min(s, 75)}%, 14%)`,
+    [`--color-${name}-50`]:  `${h} ${Math.min(s, 100)}% 97%`,
+    [`--color-${name}-100`]: `${h} ${Math.min(s, 100)}% 93%`,
+    [`--color-${name}-200`]: `${h} ${Math.min(s, 95)}% 86%`,
+    [`--color-${name}-300`]: `${h} ${Math.min(s, 90)}% 76%`,
+    [`--color-${name}-400`]: `${h} ${Math.min(s, 85)}% 66%`,
+    [`--color-${name}-500`]: `${h} ${s}% 56%`,
+    [`--color-${name}-600`]: `${h} ${s}% 46%`,
+    [`--color-${name}-700`]: `${h} ${Math.min(s, 90)}% 38%`,
+    [`--color-${name}-800`]: `${h} ${Math.min(s, 85)}% 30%`,
+    [`--color-${name}-900`]: `${h} ${Math.min(s, 80)}% 22%`,
+    [`--color-${name}-950`]: `${h} ${Math.min(s, 75)}% 14%`,
   };
 }
 
@@ -101,9 +101,9 @@ export function ThemeProvider({ children }) {
 
     // Also update glow shadows
     const { h, s } = colors.primary;
-    root.style.setProperty('--shadow-glow', `0 0 20px hsla(${h}, ${s}%, 56%, 0.3)`);
-    root.style.setProperty('--shadow-glow-lg', `0 0 40px hsla(${h}, ${s}%, 56%, 0.4)`);
-    root.style.setProperty('--selection-bg', `hsla(${h}, ${s}%, 56%, 0.3)`);
+    root.style.setProperty('--shadow-glow', `0 0 20px hsl(${h} ${s}% 56% / 0.3)`);
+    root.style.setProperty('--shadow-glow-lg', `0 0 40px hsl(${h} ${s}% 56% / 0.4)`);
+    root.style.setProperty('--selection-bg', `hsl(${h} ${s}% 56% / 0.3)`);
   }, [preset, customColors]);
 
   // Persist to localStorage
@@ -136,6 +136,7 @@ export function ThemeProvider({ children }) {
     presetThemes,
     customColors,
     setCustomColors,
+    currentTheme: customColors || presetThemes[preset],
   };
 
   return (

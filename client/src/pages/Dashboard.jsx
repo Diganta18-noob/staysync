@@ -5,9 +5,14 @@ import {
   HiOutlineCurrencyRupee, HiOutlineClipboardDocumentCheck,
   HiOutlineBuildingOffice2, HiOutlineUserGroup,
   HiOutlineArrowTrendingUp, HiOutlineArrowTrendingDown,
-  HiOutlineEllipsisHorizontal, HiOutlineBell,
-  HiOutlineCreditCard, HiOutlineShieldCheck,
+  HiOutlineDocumentArrowDown, HiOutlineBell,
+  HiOutlineEllipsisHorizontal, HiOutlineCreditCard,
+  HiOutlineShieldCheck
 } from 'react-icons/hi2';
+import RevenueChart from '../components/charts/RevenueChart';
+import OccupancyChart from '../components/charts/OccupancyChart';
+import PaymentStatusChart from '../components/charts/PaymentStatusChart';
+import { generatePaymentReport } from '../utils/pdfGenerator';
 
 const statCards = [
   {
@@ -16,8 +21,8 @@ const statCards = [
     change: '+12.5%',
     trend: 'up',
     icon: HiOutlineCurrencyRupee,
-    color: 'from-emerald-500 to-teal-600',
-    bgLight: 'bg-emerald-50 dark:bg-emerald-900/20',
+    color: 'from-primary-500 to-primary-600',
+    bgLight: 'bg-primary-50 dark:bg-primary-900/20',
   },
   {
     label: 'Active Tasks',
@@ -25,8 +30,8 @@ const statCards = [
     change: '-3',
     trend: 'down',
     icon: HiOutlineClipboardDocumentCheck,
-    color: 'from-blue-500 to-indigo-600',
-    bgLight: 'bg-blue-50 dark:bg-blue-900/20',
+    color: 'from-accent-500 to-accent-600',
+    bgLight: 'bg-accent-50 dark:bg-accent-900/20',
   },
   {
     label: 'Occupancy Rate',
@@ -34,8 +39,8 @@ const statCards = [
     change: '+2.3%',
     trend: 'up',
     icon: HiOutlineBuildingOffice2,
-    color: 'from-violet-500 to-purple-600',
-    bgLight: 'bg-violet-50 dark:bg-violet-900/20',
+    color: 'from-primary-400 to-primary-500',
+    bgLight: 'bg-primary-50/50 dark:bg-primary-900/10',
   },
   {
     label: 'Total Tenants',
@@ -43,8 +48,8 @@ const statCards = [
     change: '+8',
     trend: 'up',
     icon: HiOutlineUserGroup,
-    color: 'from-amber-500 to-orange-600',
-    bgLight: 'bg-amber-50 dark:bg-amber-900/20',
+    color: 'from-accent-400 to-accent-500',
+    bgLight: 'bg-accent-50/50 dark:bg-accent-900/10',
   },
 ];
 
@@ -155,6 +160,35 @@ const Dashboard = () => {
               </div>
             </div>
           ))}
+        </div>
+
+        {/* Charts Section */}
+        <div className="grid lg:grid-cols-3 gap-6 mb-8">
+          <div className="lg:col-span-2 glass-card p-6 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-display font-bold text-surface-900 dark:text-white">Revenue Overview</h2>
+              <button 
+                onClick={() => generatePaymentReport(recentTransactions, 'Dashboard Transactions')}
+                className="flex items-center gap-2 text-sm text-primary-600 hover:text-primary-700 font-medium bg-primary-50 dark:bg-primary-900/30 px-3 py-1.5 rounded-lg">
+                <HiOutlineDocumentArrowDown className="w-4 h-4" />
+                Export
+              </button>
+            </div>
+            <RevenueChart 
+              labels={['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun']} 
+              values={[120000, 150000, 180000, 160000, 210000, 250000]} 
+            />
+          </div>
+          <div className="space-y-6">
+            <div className="glass-card p-6 animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
+              <h2 className="text-lg font-display font-bold text-surface-900 dark:text-white mb-4">Occupancy Trends</h2>
+              <OccupancyChart data={[{ occupied: 135, vacant: 21 }]} />
+            </div>
+            <div className="glass-card p-6 animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
+              <h2 className="text-lg font-display font-bold text-surface-900 dark:text-white mb-4">Payment Status</h2>
+              <PaymentStatusChart counts={{ paid: 142, pending: 8, overdue: 4, partial: 2 }} />
+            </div>
+          </div>
         </div>
 
         <div className="grid lg:grid-cols-3 gap-6">

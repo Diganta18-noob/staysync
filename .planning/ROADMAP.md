@@ -1,18 +1,37 @@
 # Roadmap
 
-## Phase 1: Backend HTTP Caching
+## Phase 1: Backend HTTP Caching ✅
 **Goal**: Implement Cache-Control, ETag, and CDN directives in the Express backend.
-- Create `cacheMiddleware.js`.
-- Configure global ETags for Express.
-- Apply caching to `propertyRoutes.js`.
 
-## Phase 2: Client Storage Utilities
-**Goal**: Create unified services for browser storage mechanisms.
-- Implement `StorageService.js` (LocalStorage, SessionStorage, Cookies).
-- Implement `idbCache.js` for IndexedDB integration.
+## Phase 2: Custom Theme System
+**Goal**: Runtime theme engine with light/dark/custom brand themes via CSS variables.
 
-## Phase 3: Frontend Refactoring & Stale-While-Revalidate
-**Goal**: Migrate `Properties.jsx` from local mock arrays to live API fetches using the new caching systems.
-- Fetch properties from actual backend endpoint.
-- Implement Stale-While-Revalidate pattern using IndexedDB.
-- Persist filter state using SessionStorage.
+## Phase 3: PG Business Process Logic
+**Goal**: Rent cycles, payment tracking, leave management, meal deduction workflows.
+
+## Phase 4: Rich Dashboard (Chart.js)
+**Goal**: Data-driven analytics dashboard with interactive charts and live API data.
+
+## Phase 5: PDF Reporting (jsPDF)
+**Goal**: Downloadable PDF reports — rent receipts, occupancy summaries, audit trails.
+
+## Phase 6: Role-Based Access Hardening
+**Goal**: Granular permission system replacing simple role checks.
+
+## Phase 7: Audit Logging Expansion
+**Goal**: Before/after snapshots, auto-capture middleware, advanced filtering and export.
+
+## Phase 8: Full-Text Search
+**Goal**: Global search across properties, tenants, rooms, bookings with Cmd+K modal.
+
+## Phase 9: Cloud Integration — Blob Storage & Functions
+**Goal**: Abstract storage layer (Cloudinary/S3/Azure), serverless function runner.
+
+## Phase 10: Async Services (Queues & Email)
+**Goal**: Background job processing — email notifications, rent reminders, report generation.
+
+## Phase 11: Compliance Layer (GDPR / FedRAMP)
+**Goal**: Data privacy tooling — consent tracking, right to deletion, retention policies, security headers.
+
+## Phase 12: Defect Tracking & Scope Changes
+**Goal**: Kanban defect board, scope change request workflow with approval chain.

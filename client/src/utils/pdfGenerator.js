@@ -1,5 +1,5 @@
 import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 
 const BRAND = {
   name: 'StaySync',
@@ -122,7 +122,7 @@ export function generateRentReceipt(payment) {
 export function generateOccupancyReport(properties) {
   const doc = createDoc('Occupancy Report');
 
-  doc.autoTable({
+  autoTable(doc, {
     startY: 36,
     head: [['Property', 'Total Rooms', 'Occupied', 'Vacant', 'Rate']],
     body: properties.map((p) => [
@@ -156,7 +156,7 @@ export function generateOccupancyReport(properties) {
 export function generateAuditReport(logs) {
   const doc = createDoc('Audit Trail Report', 'landscape');
 
-  doc.autoTable({
+  autoTable(doc, {
     startY: 36,
     head: [['Date', 'Action', 'Performed By', 'Role', 'Target', 'Details']],
     body: logs.map((log) => [
@@ -194,7 +194,7 @@ export function generateAuditReport(logs) {
 export function generatePaymentReport(payments, title = 'Payment Report') {
   const doc = createDoc(title);
 
-  doc.autoTable({
+  autoTable(doc, {
     startY: 36,
     head: [['Tenant', 'Room', 'Amount', 'Due Date', 'Status', 'Paid']],
     body: payments.map((p) => [
