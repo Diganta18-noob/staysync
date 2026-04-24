@@ -4,6 +4,7 @@ const {
   updateProperty, deleteProperty, getMyProperties,
 } = require('../controllers/propertyController');
 const { protect, authorize } = require('../middleware/auth');
+const { cacheControl, generateETag, clearCache } = require('../middleware/cacheMiddleware');
 const roomRoutes = require('./roomRoutes');
 
 const router = express.Router();
@@ -11,11 +12,11 @@ const router = express.Router();
 // Re-route into room routes
 router.use('/:propertyId/rooms', roomRoutes);
 
-router.get('/', getProperties);
+router.get('/', generateETag, cacheControl(300), getProperties);
 router.get('/my', protect, authorize('owner', 'admin'), getMyProperties);
-router.get('/:id', getProperty);
-router.post('/', protect, authorize('owner', 'admin'), createProperty);
-router.put('/:id', protect, authorize('owner', 'admin'), updateProperty);
-router.delete('/:id', protect, authorize('owner', 'admin'), deleteProperty);
+router.get('/:id', generateETag, cacheControl(300), getProperty);
+router.post('/', protect, authorize('owner', 'admin'), clearCache, createProperty);
+router.put('/:id', protect, authorize('owner', 'admin'), clearCache, updateProperty);
+router.delete('/:id', protect, authorize('owner', 'admin'), clearCache, deleteProperty);
 
 module.exports = router;
