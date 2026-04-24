@@ -4,6 +4,8 @@ const helmet = require('helmet');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
 const errorHandler = require('./middleware/errorHandler');
+const complianceHeaders = require('./middleware/complianceHeaders');
+const { gdprHeaders } = require('./middleware/gdprMiddleware');
 
 // Route files
 const authRoutes = require('./routes/authRoutes');
@@ -20,6 +22,8 @@ const app = express();
 
 // Security headers
 app.use(helmet());
+app.use(complianceHeaders);
+app.use(gdprHeaders);
 
 // CORS
 app.use(
@@ -59,6 +63,12 @@ app.use('/api/audit', auditRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/search', searchRoutes);
+
+// GDPR compliance routes
+const { protect } = require('./middleware/auth');
+const { exportPersonalData, deleteMyAccount } = require('./middleware/gdprMiddleware');
+app.get('/api/users/me/data-export', protect, exportPersonalData);
+app.delete('/api/users/me', protect, deleteMyAccount);
 
 // Health check
 app.get('/api/health', (req, res) => {
