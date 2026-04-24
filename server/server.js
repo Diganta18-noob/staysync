@@ -4,6 +4,7 @@ const { Server } = require('socket.io');
 const app = require('./src/app');
 const connectDB = require('./src/config/db');
 const seedAdmin = require('./src/utils/seedAdmin');
+const seedPermissions = require('./src/utils/seedPermissions');
 
 const PORT = process.env.PORT || 5000;
 
@@ -43,6 +44,7 @@ io.on('connection', (socket) => {
 const startServer = async () => {
   await connectDB();
   await seedAdmin();
+  await seedPermissions();
 
   server.listen(PORT, () => {
     console.log(`\n🏠 StaySync API Server`);
